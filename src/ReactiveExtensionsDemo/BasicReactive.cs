@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Reactive.Subjects;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Reactive.Linq;
 using System.Diagnostics;
@@ -42,8 +43,39 @@ namespace ReactiveExtensionsDemo
             source.Subscribe(x => Debug.WriteLine(x),
                             e => Debug.WriteLine(e),
                             () => Debug.WriteLine("finished"));
+            
         }
 
+
+        public event EventHandler RegularNetEvent;
+        [TestMethod]
+        public void DotNetEvent()
+        {
+            RegularNetEvent += (s,e) => Debug.WriteLine("evoked");
+            RegularNetEvent(this, null);       
+        } 
+        
+        [TestMethod]
+        public void FromDotNetEvent()
+        {
+            var reactiveEvent = Observable.FromEventPattern(ev => RegularNetEvent += ev, ev => RegularNetEvent -= ev);
+            //var reactiveEvent = Observable.FromEventPattern(this, "RegularNetEvent");
+            
+            reactiveEvent.Subscribe(x => Debug.WriteLine("evoked"));
+            RegularNetEvent(this, null);     
+        }
+
+        [TestMethod]
+        public void Subject()
+        {
+            var subject = new Subject<int>();
+            subject.Subscribe(x => Debug.WriteLine(x));
+
+            subject.OnNext(0);
+            subject.OnNext(1);
+            subject.OnNext(2);
+            subject.OnNext(0);         
+        }
 
     }
 }
