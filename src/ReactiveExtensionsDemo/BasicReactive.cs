@@ -17,11 +17,20 @@ namespace ReactiveExtensionsDemo
             range.Subscribe(x => Debug.WriteLine(x),
                             e => Debug.WriteLine(e),
                             () => Debug.WriteLine("finished"));
-        }   
-        
-        
+        }
 
 
 
+
+        [TestMethod]
+        public void ObservableTimer()
+        {
+            var range = Observable.Timer(TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(1)).Timestamp();
+
+            range.Subscribe(x => Debug.WriteLine(x),
+                            e => Debug.WriteLine(e),
+                            () => Debug.WriteLine("finished"));
+            Thread.Sleep(6000);
+        }
     }
 }
