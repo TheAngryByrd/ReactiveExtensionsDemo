@@ -1,8 +1,11 @@
 ﻿using System;
+using System.Linq;
 using System.Reactive.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Reactive.Subjects;
 using System.Diagnostics;
+using System.Collections.Generic;
+using System.Threading;
 
 namespace ReactiveExtensionsDemo
 {
@@ -59,6 +62,45 @@ namespace ReactiveExtensionsDemo
             var mergedSource = source1.Zip(source2, /*Map or Reduce*/ (x, y) => x + y);
 
             mergedSource.Subscribe(x => Debug.WriteLine(x));
+        }
+
+        [TestMethod]
+        public void Retry()
+        {
+            var eventStream = Observable.Range(0,3).Concat(Observable.Throw<int>(new Exception()));
+
+            eventStream.Retry(2).Subscribe(x => Debug.WriteLine(x),
+                                           e => Debug.WriteLine(e));
+        }
+
+        [TestMethod]
+        public void Buffer()
+        {
+            var myInbox = EndlessBarrageOfEmail().ToObservable();
+
+            var getMailEveryThreeSeconds = myInbox.Buffer(TimeSpan.FromSeconds(3));
+
+            getMailEveryThreeSeconds.Subscribe(emails =>
+            {
+                Debug.WriteLine("You've got {0} new messages!  Here they are!", emails.Count());
+                foreach (var email in emails)
+                {
+                    Debug.WriteLine("> {0}", email);
+                }
+                Debug.WriteLine("");
+            });
+        }
+
+        private IEnumerable<string> EndlessBarrageOfEmail()
+        {
+            var random = new Random();
+            var emails = new List<String> { "Here is an email!", "Another email!", "Yet another email!" };
+            for (int i = 0 ; i<20 ; i ++ )
+            {
+                // Return some random emails at random intervals.
+                yield return emails[random.Next(emails.Count)];
+                Thread.Sleep(random.Next(1000));
+            }
         }
     }
 }
