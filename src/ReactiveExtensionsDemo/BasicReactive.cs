@@ -4,7 +4,6 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Reactive.Linq;
 using System.Diagnostics;
 using System.Threading;
-using System.Linq;
 using System.Collections.Generic;
 
 namespace ReactiveExtensionsDemo
