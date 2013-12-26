@@ -76,5 +76,18 @@ namespace ReactiveExtensionsDemo
             subject.OnNext(0);         
         }
 
+        [TestMethod]
+        public void StopNotifying()
+        {
+            var remote = new Subject<bool>();
+
+            var tvSubscription = remote.Subscribe(x => Debug.WriteLine("TV on: {0}", x));
+            var speakerSubscription = remote.Subscribe(x => Debug.WriteLine("Speakers on: {0}", x));
+
+            remote.OnNext(true);
+            speakerSubscription.Dispose();
+            remote.OnNext(false);
+        }
+
     }
 }

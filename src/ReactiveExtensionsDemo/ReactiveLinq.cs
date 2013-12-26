@@ -28,7 +28,7 @@ namespace ReactiveExtensionsDemo
             var subject = new Subject<string>();
 
             subject.Select(x => x.Length).Subscribe(x => Debug.WriteLine(x));
-            subject.SelectMany(x => x.Length).Subscribe(x => Debug.WriteLine(x));
+            
 
             subject.OnNext("telerik");
             subject.OnNext("has");
