@@ -48,12 +48,10 @@ namespace ReactiveExtensionsDemo
             mergedSource.Subscribe(x => Debug.WriteLine(x));
         }   
 
-
-
         [TestMethod]
         public void Zip()
         {
-            var source1 = Observable.Repeat(1, 3);
+            var source1 = Observable.Repeat(1, 4);
             var source2 = Observable.Repeat(2, 3);
 
             //Zip - returns values from one stream paired with values from another, 

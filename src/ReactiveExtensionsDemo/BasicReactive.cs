@@ -86,6 +86,7 @@ namespace ReactiveExtensionsDemo
 
             remote.OnNext(true);
             speakerSubscription.Dispose();
+
             remote.OnNext(false);
         }
 
