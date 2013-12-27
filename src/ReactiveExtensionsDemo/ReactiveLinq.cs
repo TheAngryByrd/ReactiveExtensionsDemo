@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using System.Reactive.Linq;
+using System.Reactive.Threading.Tasks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Reactive.Subjects;
 using System.Diagnostics;
@@ -8,6 +9,7 @@ using System.Collections.Generic;
 using Microsoft.Reactive.Testing;
 using System.Reactive.Concurrency;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace ReactiveExtensionsDemo
 {
@@ -76,12 +78,12 @@ namespace ReactiveExtensionsDemo
         }
 
 
-        private IObservable<string> EndlessBarrageOfEmail(IScheduler sched = null)
+        private IObservable<string> EndlessBarrageOfEmail(IScheduler scheduler = null)
         {
-            sched = sched ?? Scheduler.CurrentThread;
+            scheduler = scheduler ?? Scheduler.CurrentThread;
             var random = new Random();
             var emails = new List<String> { "Here is an email!", "Another email!", "Yet another email!" };
-            return Observable.Timer(TimeSpan.FromSeconds(0), TimeSpan.FromMilliseconds(random.Next(1000)), sched)
+            return Observable.Timer(TimeSpan.FromSeconds(0), TimeSpan.FromMilliseconds(random.Next(1000)), scheduler)
                 .Select(_ => emails[random.Next(emails.Count)]);
 
         }
@@ -127,11 +129,11 @@ namespace ReactiveExtensionsDemo
         public void TestScheduler()
         {
             //This is how you become a Timelord
-            var sched = new TestScheduler();
+            var testScheduler = new TestScheduler();
 
-            var myInbox = EndlessBarrageOfEmail(sched);
+            var myInbox = EndlessBarrageOfEmail(testScheduler);
 
-            var getMailEveryThreeSeconds = myInbox.Buffer(TimeSpan.FromSeconds(3), sched);
+            var getMailEveryThreeSeconds = myInbox.Buffer(TimeSpan.FromSeconds(3), testScheduler);
 
             getMailEveryThreeSeconds.Subscribe(emails =>
             {
@@ -142,11 +144,16 @@ namespace ReactiveExtensionsDemo
                 }
                 Debug.WriteLine("");
             });
-            //sched.Start(() => getMailEveryThreeSeconds);
-            sched.AdvanceBy(TimeSpan.FromMilliseconds(100).Ticks);
-            sched.AdvanceBy(TimeSpan.FromMilliseconds(3500).Ticks);
+            
+            testScheduler.AdvanceBy(TimeSpan.FromMilliseconds(100).Ticks);
+            testScheduler.AdvanceBy(TimeSpan.FromMilliseconds(3500).Ticks);
 
-            sched.AdvanceBy(TimeSpan.FromMilliseconds(30500).Ticks);
+            //testScheduler.AdvanceBy(TimeSpan.FromMilliseconds(30500).Ticks);
         }
+
+      
+       
     }
+
+    
 }

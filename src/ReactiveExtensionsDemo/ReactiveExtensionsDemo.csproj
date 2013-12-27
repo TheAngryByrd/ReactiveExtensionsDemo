@@ -68,6 +68,7 @@
     <Compile Include="BasicReactive.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ReactiveLinq.cs" />
+    <Compile Include="TPL.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
