@@ -45,7 +45,6 @@ namespace ReactiveExtensionsDemo
             
         }
 
-
         public event EventHandler RegularNetEvent;
         [TestMethod]
         public void DotNetEvent()

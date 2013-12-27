@@ -5,6 +5,8 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Reactive.Subjects;
 using System.Diagnostics;
 using System.Collections.Generic;
+using Microsoft.Reactive.Testing;
+using System.Reactive.Concurrency;
 using System.Threading;
 
 namespace ReactiveExtensionsDemo
@@ -73,10 +75,21 @@ namespace ReactiveExtensionsDemo
                                            e => Debug.WriteLine(e));
         }
 
+
+        private IObservable<string> EndlessBarrageOfEmail(IScheduler sched = null)
+        {
+            sched = sched ?? Scheduler.CurrentThread;
+            var random = new Random();
+            var emails = new List<String> { "Here is an email!", "Another email!", "Yet another email!" };
+            return Observable.Timer(TimeSpan.FromSeconds(0), TimeSpan.FromMilliseconds(random.Next(1000)), sched)
+                .Select(_ => emails[random.Next(emails.Count)]);
+
+        }
+
         [TestMethod]
         public void Buffer()
         {
-            var myInbox = EndlessBarrageOfEmail().ToObservable();
+            var myInbox = EndlessBarrageOfEmail();
 
             var getMailEveryThreeSeconds = myInbox.Buffer(TimeSpan.FromSeconds(3));
 
@@ -91,16 +104,49 @@ namespace ReactiveExtensionsDemo
             });
         }
 
-        private IEnumerable<string> EndlessBarrageOfEmail()
+        [TestMethod]
+        public void BufferAsync()
         {
-            var random = new Random();
-            var emails = new List<String> { "Here is an email!", "Another email!", "Yet another email!" };
-            for (int i = 0 ; i<20 ; i ++ )
+            var myInbox = EndlessBarrageOfEmail(Scheduler.TaskPool);
+
+            var getMailEveryThreeSeconds = myInbox.Buffer(TimeSpan.FromSeconds(3), Scheduler.TaskPool);
+
+            getMailEveryThreeSeconds.Subscribe(emails =>
             {
-                // Return some random emails at random intervals.
-                yield return emails[random.Next(emails.Count)];
-                Thread.Sleep(random.Next(1000));
-            }
+                Debug.WriteLine("You've got {0} new messages!  Here they are!", emails.Count());
+                foreach (var email in emails)
+                {
+                    Debug.WriteLine("> {0}", email);
+                }
+                Debug.WriteLine("");
+            });
+            Thread.Sleep(8000);
+        }
+
+        [TestMethod]
+        public void TestScheduler()
+        {
+            //This is how you become a Timelord
+            var sched = new TestScheduler();
+
+            var myInbox = EndlessBarrageOfEmail(sched);
+
+            var getMailEveryThreeSeconds = myInbox.Buffer(TimeSpan.FromSeconds(3), sched);
+
+            getMailEveryThreeSeconds.Subscribe(emails =>
+            {
+                Debug.WriteLine("You've got {0} new messages!  Here they are!", emails.Count());
+                foreach (var email in emails)
+                {
+                    Debug.WriteLine("> {0}", email);
+                }
+                Debug.WriteLine("");
+            });
+            //sched.Start(() => getMailEveryThreeSeconds);
+            sched.AdvanceBy(TimeSpan.FromMilliseconds(100).Ticks);
+            sched.AdvanceBy(TimeSpan.FromMilliseconds(3500).Ticks);
+
+            sched.AdvanceBy(TimeSpan.FromMilliseconds(30500).Ticks);
         }
     }
 }
